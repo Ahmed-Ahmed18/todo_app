@@ -3,8 +3,13 @@ import 'package:todo_app/core/application_them.dart';
 import 'package:todo_app/core/page_routes_name.dart';
 import 'package:todo_app/core/routes_generator.dart';
 import 'package:todo_app/moduls/splash/splash_view.dart';
-
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 

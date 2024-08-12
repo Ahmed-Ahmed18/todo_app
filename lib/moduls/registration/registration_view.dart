@@ -1,25 +1,25 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:todo_app/core/app_color.dart';
-import 'package:todo_app/core/page_routes_name.dart';
 
-class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+import '../../core/app_color.dart';
 
+class RegistrationView extends StatefulWidget {
+  const RegistrationView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<RegistrationView> createState() => _RegistrationViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _RegistrationViewState extends State<RegistrationView> {
 
   TextEditingController emailcontroler=TextEditingController();
   TextEditingController passwordcontroler=TextEditingController();
+  TextEditingController personcontroler=TextEditingController();
   bool isobsecured=false;
   var Formkey= GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     var mediquery=MediaQuery.of(context);
-
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(image: AssetImage('assets/images/background.png',
@@ -29,8 +29,9 @@ class _LoginViewState extends State<LoginView> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.transparent,
-        appBar: AppBar(  iconTheme: Theme.of(context).iconTheme ,
-          title:Text('Login',textAlign: TextAlign.center,
+        appBar: AppBar(
+          iconTheme: Theme.of(context).iconTheme ,
+          title:Text('Create Account',textAlign: TextAlign.center,
             style:
             Theme.of(context).textTheme.bodySmall,) ,
           centerTitle: true,
@@ -45,13 +46,49 @@ class _LoginViewState extends State<LoginView> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
 
-                  SizedBox(height: mediquery.size.height*.2,),
+                  SizedBox(height: mediquery.size.height*.16,),
+                  TextFormField(
+                    validator: (value){
+                      if(value==null || value.trim().isEmpty){
+                        return'Please Enter Your Name';
+                      }
+                      return null;
+                    },
+                    controller:personcontroler,
+                    cursorColor: AppColor.primarycolor,
+                    cursorHeight: 25,
+                    style: TextStyle(
+                        fontFamily: 'poppins',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColor.blackcolor
+                    ),
+                    decoration: InputDecoration(
+                      errorStyle: TextStyle(
+                          fontSize: 12
+                      ),
+                      hintText: 'Enter Your Name',
+                      hintStyle: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 15
+                      ),
+                      label: Text('Full Name',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w400
+                        ),),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                            color: AppColor.primarycolor,
+                            width: 2
+                        ),
+                      ),
+                      suffixIcon: Icon(Icons.person),
+                    ),
 
-                  Text('Welcome Back!',
-                    style:
-                    Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w800),),
+                  ),
+
                   TextFormField(
                     validator: (value){
                       if(value==null || value.trim().isEmpty){
@@ -145,20 +182,7 @@ class _LoginViewState extends State<LoginView> {
 
                   ),
                   SizedBox(height: 20,),
-                  InkWell(
-                    onTap: (){
 
-                    },
-                    child: Text('Forget Password?',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontSize: 14,
-                          color: AppColor.blackcolor,
-                          fontWeight: FontWeight.w400,
-                          decoration: TextDecoration.underline
-                      ),),
-                  ),
-
-                  SizedBox(height: 60,),
 
                   FilledButton(
                       style:
@@ -171,13 +195,13 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       onPressed: (){
                         if(Formkey.currentState!.validate()){
-                         Navigator.pushNamed(context, PageRoutesName.layout);
+                          print('is valid');
                         }
                       },
                       child:Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Login',
+                          Text('Create My Account',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600
@@ -186,20 +210,6 @@ class _LoginViewState extends State<LoginView> {
                           Icon(Icons.arrow_forward_outlined),
                         ],
                       )),
-                  SizedBox(height: 30,),
-                  InkWell(
-                    onTap: (){
-                      Navigator.pushNamed(context,PageRoutesName.registration);
-                    },
-                    child: Text('Or Create My Account',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 14,
-                        color: AppColor.blackcolor,
-                        fontWeight: FontWeight.w400,
-
-                      ),),
-                  ),
 
                 ],
               ),

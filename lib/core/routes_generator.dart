@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_app/core/page_routes_name.dart';
+import 'package:todo_app/moduls/layout_view.dart';
 import 'package:todo_app/moduls/login/login_view.dart';
+import 'package:todo_app/moduls/registration/registration_view.dart';
 import 'package:todo_app/moduls/splash/splash_view.dart';
 
 class RoutesGenerator{
@@ -17,6 +19,16 @@ class RoutesGenerator{
       case PageRoutesName.login:
         return MaterialPageRoute(builder: (context)=>LoginView(),
         settings: settings
+        );
+      case PageRoutesName.registration:
+        return MaterialPageRoute(builder: (context)=>RegistrationView(),
+          settings: settings,
+
+        );
+      case PageRoutesName.layout:
+        return MaterialPageRoute(builder: (context)=>LayoutView(),
+          settings: settings,
+
         );
       default :
         return MaterialPageRoute(builder: (context)=>SplashView(),
