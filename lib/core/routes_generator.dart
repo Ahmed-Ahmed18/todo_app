@@ -5,6 +5,7 @@ import 'package:todo_app/moduls/layout_view.dart';
 import 'package:todo_app/moduls/login/login_view.dart';
 import 'package:todo_app/moduls/registration/registration_view.dart';
 import 'package:todo_app/moduls/splash/splash_view.dart';
+import 'package:todo_app/moduls/tasks/widgets/edit_task.dart';
 
 class RoutesGenerator{
 
@@ -14,7 +15,6 @@ class RoutesGenerator{
       case PageRoutesName.initial:
         return MaterialPageRoute(builder: (context)=>SplashView(),
           settings: settings,
-
         );
       case PageRoutesName.login:
         return MaterialPageRoute(builder: (context)=>LoginView(),
@@ -30,10 +30,14 @@ class RoutesGenerator{
           settings: settings,
 
         );
+      case PageRoutesName.edit:
+        return MaterialPageRoute(builder: (context)=>EditTask(),
+          settings: settings,
+
+        );
       default :
         return MaterialPageRoute(builder: (context)=>SplashView(),
           settings: settings,
-
         );
     }
 

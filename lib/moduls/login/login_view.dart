@@ -1,6 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app/core/app_color.dart';
 import 'package:todo_app/core/page_routes_name.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:todo_app/dialog_utils.dart';
+import 'package:todo_app/firebase_utils.dart';
+import 'package:todo_app/provider/settings_provider.dart';
+
+import '../../provider/auth_user_provider.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -19,18 +27,19 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     var mediquery=MediaQuery.of(context);
+    var settingsprovider=Provider.of<SettingsProvider>(context);
 
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(image: AssetImage('assets/images/background.png',
         ),fit: BoxFit.cover),
-        color: AppColor.scaffoldbackground,
+        color:settingsprovider.isDark()?AppColor.scaffoldbackgrounddark:AppColor.scaffoldbackground,
       ),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.transparent,
         appBar: AppBar(  iconTheme: Theme.of(context).iconTheme ,
-          title:Text('Login',textAlign: TextAlign.center,
+          title:Text(AppLocalizations.of(context)!.login,textAlign: TextAlign.center,
             style:
             Theme.of(context).textTheme.bodySmall,) ,
           centerTitle: true,
@@ -47,10 +56,10 @@ class _LoginViewState extends State<LoginView> {
 
                   SizedBox(height: mediquery.size.height*.2,),
 
-                  Text('Welcome Back!',
+                  Text(AppLocalizations.of(context)!.welcome,
                     style:
                     Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.black,
+                        color: settingsprovider.isDark()?AppColor.whitecolor:Colors.black,
                         fontWeight: FontWeight.w800),),
                   TextFormField(
                     validator: (value){
@@ -66,7 +75,7 @@ class _LoginViewState extends State<LoginView> {
                         fontFamily: 'poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: AppColor.blackcolor
+                        color: settingsprovider.isDark()?AppColor.whitecolor:AppColor.blackcolor
                     ),
                     decoration: InputDecoration(
                       errorStyle: TextStyle(
@@ -77,9 +86,9 @@ class _LoginViewState extends State<LoginView> {
                           color: Colors.grey,
                           fontSize: 15
                       ),
-                      label: Text('E-Mail',
+                      label: Text(AppLocalizations.of(context)!.e_mail,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.black,
+                            color: settingsprovider.isDark()?AppColor.whitecolor:Colors.black,
                             fontSize: 15,
                             fontWeight: FontWeight.w400
                         ),),
@@ -109,7 +118,7 @@ class _LoginViewState extends State<LoginView> {
                         fontFamily: 'poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: AppColor.blackcolor
+                        color: settingsprovider.isDark()?AppColor.whitecolor:AppColor.blackcolor
                     ),
                     decoration: InputDecoration(
                       errorStyle: TextStyle(
@@ -120,9 +129,9 @@ class _LoginViewState extends State<LoginView> {
                           color: Colors.grey,
                           fontSize: 15
                       ),
-                      label: Text('password',
+                      label: Text(AppLocalizations.of(context)!.password,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.black,
+                            color:settingsprovider.isDark()?AppColor.whitecolor: Colors.black,
                             fontSize: 15,
                             fontWeight: FontWeight.w400
                         ),),
@@ -149,10 +158,10 @@ class _LoginViewState extends State<LoginView> {
                     onTap: (){
 
                     },
-                    child: Text('Forget Password?',
+                    child: Text(AppLocalizations.of(context)!.forget_password,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontSize: 14,
-                          color: AppColor.blackcolor,
+                          color: settingsprovider.isDark()?AppColor.whitecolor:AppColor.blackcolor,
                           fontWeight: FontWeight.w400,
                           decoration: TextDecoration.underline
                       ),),
@@ -170,14 +179,12 @@ class _LoginViewState extends State<LoginView> {
                           )
                       ),
                       onPressed: (){
-                        if(Formkey.currentState!.validate()){
-                         Navigator.pushNamed(context, PageRoutesName.layout);
-                        }
+                        login();
                       },
                       child:Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Login',
+                          Text(AppLocalizations.of(context)!.login,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600
@@ -191,11 +198,11 @@ class _LoginViewState extends State<LoginView> {
                     onTap: (){
                       Navigator.pushNamed(context,PageRoutesName.registration);
                     },
-                    child: Text('Or Create My Account',
+                    child: Text(AppLocalizations.of(context)!.create_acc,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontSize: 14,
-                        color: AppColor.blackcolor,
+                        color: settingsprovider.isDark()?AppColor.whitecolor:AppColor.blackcolor,
                         fontWeight: FontWeight.w400,
 
                       ),),
@@ -211,5 +218,29 @@ class _LoginViewState extends State<LoginView> {
 
     );
 
+  }
+  void login()async{
+    if(Formkey.currentState!.validate()==true){
+
+      DialogUtils.showLoading(context: context, message: 'Loading...');
+      try {
+        final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: emailcontroler.text,
+            password: passwordcontroler.text
+        );
+        var user =await FirebaseUtils.readFromFireStore(credential.user?.uid??'');
+        if(user==null){
+          return;
+        }
+        var authprovider=Provider.of<AuthUserProvider>(context,listen: false);
+        authprovider.updateUser(user);
+        DialogUtils.hideLoading(context);
+        DialogUtils.showMessage(context: context, content: 'login successfully',textButton: 'OK');
+        Navigator.pushNamed(context, PageRoutesName.layout);
+      }  catch (e) {
+        DialogUtils.hideLoading(context);
+        DialogUtils.showMessage(context: context, content:e.toString(),textButton: 'Try Again');
+      }
+    }
   }
 }

@@ -1,6 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_app/core/page_routes_name.dart';
+import 'package:todo_app/dialog_utils.dart';
+import 'package:todo_app/firebase_utils.dart';
+import 'package:todo_app/model/my_user.dart';
+import 'package:todo_app/provider/auth_user_provider.dart';
+import 'package:todo_app/provider/settings_provider.dart';
 import '../../core/app_color.dart';
 
 class RegistrationView extends StatefulWidget {
@@ -20,18 +28,19 @@ class _RegistrationViewState extends State<RegistrationView> {
   @override
   Widget build(BuildContext context) {
     var mediquery=MediaQuery.of(context);
+    var settingsprovider=Provider.of<SettingsProvider>(context);
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(image: AssetImage('assets/images/background.png',
         ),fit: BoxFit.cover),
-        color: AppColor.scaffoldbackground,
+        color: settingsprovider.isDark()?AppColor.scaffoldbackgrounddark:AppColor.scaffoldbackground,
       ),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           iconTheme: Theme.of(context).iconTheme ,
-          title:Text('Create Account',textAlign: TextAlign.center,
+          title:Text(AppLocalizations.of(context)!.create_acc,textAlign: TextAlign.center,
             style:
             Theme.of(context).textTheme.bodySmall,) ,
           centerTitle: true,
@@ -61,7 +70,7 @@ class _RegistrationViewState extends State<RegistrationView> {
                         fontFamily: 'poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: AppColor.blackcolor
+                        color: settingsprovider.isDark()?AppColor.whitecolor:AppColor.blackcolor
                     ),
                     decoration: InputDecoration(
                       errorStyle: TextStyle(
@@ -72,9 +81,9 @@ class _RegistrationViewState extends State<RegistrationView> {
                           color: Colors.grey,
                           fontSize: 15
                       ),
-                      label: Text('Full Name',
+                      label: Text(AppLocalizations.of(context)!.full_name,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.black,
+                            color: settingsprovider.isDark()?AppColor.whitecolor:Colors.black,
                             fontSize: 15,
                             fontWeight: FontWeight.w400
                         ),),
@@ -103,7 +112,7 @@ class _RegistrationViewState extends State<RegistrationView> {
                         fontFamily: 'poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: AppColor.blackcolor
+                        color: settingsprovider.isDark()?AppColor.whitecolor:Colors.black,
                     ),
                     decoration: InputDecoration(
                       errorStyle: TextStyle(
@@ -114,9 +123,10 @@ class _RegistrationViewState extends State<RegistrationView> {
                           color: Colors.grey,
                           fontSize: 15
                       ),
-                      label: Text('E-Mail',
+                      label: Text(AppLocalizations.of(context)!.e_mail,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.black,
+                            color: settingsprovider.isDark()?AppColor.whitecolor:Colors.black,
+
                             fontSize: 15,
                             fontWeight: FontWeight.w400
                         ),),
@@ -146,7 +156,7 @@ class _RegistrationViewState extends State<RegistrationView> {
                         fontFamily: 'poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: AppColor.blackcolor
+                        color: settingsprovider.isDark()?AppColor.whitecolor:Colors.black,
                     ),
                     decoration: InputDecoration(
                       errorStyle: TextStyle(
@@ -157,9 +167,9 @@ class _RegistrationViewState extends State<RegistrationView> {
                           color: Colors.grey,
                           fontSize: 15
                       ),
-                      label: Text('password',
+                      label: Text(AppLocalizations.of(context)!.password,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.black,
+                            color: settingsprovider.isDark()?AppColor.whitecolor:Colors.black,
                             fontSize: 15,
                             fontWeight: FontWeight.w400
                         ),),
@@ -194,14 +204,12 @@ class _RegistrationViewState extends State<RegistrationView> {
                           )
                       ),
                       onPressed: (){
-                        if(Formkey.currentState!.validate()){
-                          print('is valid');
-                        }
+                        register();
                       },
                       child:Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Create My Account',
+                          Text(AppLocalizations.of(context)!.create_acc,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600
@@ -221,5 +229,30 @@ class _RegistrationViewState extends State<RegistrationView> {
 
     );
 
+  }
+  void register()async{
+    if(Formkey.currentState!.validate()==true){
+      DialogUtils.showLoading(context: context, message: 'Loading...');
+      try {
+        final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailcontroler.text,
+          password: passwordcontroler.text,
+        );
+        MyUser myUser=MyUser(id:credential.user?.uid??'',
+            name:personcontroler.text,
+            email: emailcontroler.text);
+       var authprovider=Provider.of<AuthUserProvider>(context,listen: false);
+       authprovider.updateUser(myUser);
+        await FirebaseUtils.addUserToFireStore(myUser);
+      DialogUtils.hideLoading(context);
+      DialogUtils.showMessage(context: context, content:'Register Successfully',textButton: 'OK');
+      Navigator.pushNamed(context, PageRoutesName.login);
+      }  catch (e) {
+        DialogUtils.hideLoading(context);
+        DialogUtils.showMessage(context: context, content:e.toString(),
+            textButton: 'Try Again');
+
+      }
+    }
   }
 }

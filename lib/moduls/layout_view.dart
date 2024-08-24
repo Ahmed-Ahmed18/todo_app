@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app/core/app_color.dart';
+import 'package:todo_app/core/page_routes_name.dart';
 import 'package:todo_app/moduls/settings/settings_view.dart';
 import 'package:todo_app/moduls/tasks/Tasks_View.dart';
+import 'package:todo_app/moduls/tasks/widgets/task_bottom_sheet.dart';
+import 'package:todo_app/provider/auth_user_provider.dart';
+import 'package:todo_app/provider/list_provider.dart';
+
+import '../provider/settings_provider.dart';
 
 class LayoutView extends StatefulWidget {
 LayoutView({super.key});
@@ -19,18 +26,24 @@ List<Widget>screens=[
 
   @override
   Widget build(BuildContext context) {
+    var settingsprovider=Provider.of<SettingsProvider>(context);
+    var listprovider=Provider.of<ListProvider>(context);
+    var authprovider=Provider.of<AuthUserProvider>(context);
     return Scaffold(
       extendBody: true,
         body: screens[selectedindex],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         elevation: 2,
-        backgroundColor: AppColor.whitecolor,
+        backgroundColor: settingsprovider.isDark()?AppColor.scaffoldbackgrounddark:AppColor.whitecolor,
         shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(40),
 
       ),
-        onPressed: (){},
+        onPressed: (){
+        showAddTaskBottomSheet();
+
+        },
 
         child:CircleAvatar(
           backgroundColor: AppColor.primarycolor,
@@ -45,7 +58,7 @@ List<Widget>screens=[
         height: 93,
         shape: CircularNotchedRectangle(),
         notchMargin: 15,
-        color: AppColor.whitecolor,
+        color: settingsprovider.isDark()?AppColor.bottomnavbardark: AppColor.whitecolor,
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -64,5 +77,9 @@ List<Widget>screens=[
         ]),
       )
     );
+  }
+  void showAddTaskBottomSheet(){
+    showModalBottomSheet(context: context,
+        builder: (context)=>TaskBottomSheet());
   }
 }
